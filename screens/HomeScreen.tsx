@@ -4,21 +4,22 @@ import {
   Text, 
   StyleSheet, 
   TouchableOpacity, 
-  ScrollView, 
+  ScrollView,
   Switch,
-  Image,
-  Platform,
   Dimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { toast } from 'sonner-native';
+import { useTheme, theme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+  const { isDarkMode } = useTheme();
+  const currentTheme = isDarkMode ? theme.dark : theme.light;
   const [safetyMonitoring, setSafetyMonitoring] = useState(false);
   const [locationSharing, setLocationSharing] = useState(false);
   const [audioMonitoring, setAudioMonitoring] = useState(false);
@@ -55,32 +56,37 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Guardian</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <View style={[styles.header, { 
+        backgroundColor: currentTheme.surface,
+        borderBottomColor: currentTheme.border 
+      }]}>
+        <Text style={[styles.headerTitle, { color: currentTheme.text }]}>Guardian</Text>
         <TouchableOpacity 
           style={styles.settingsButton}
           onPress={() => navigation.navigate('Settings')}
         >
-          <Ionicons name="settings-outline" size={24} color="#333" />
+          <Ionicons name="settings-outline" size={24} color={currentTheme.text} />
         </TouchableOpacity>
       </View>
 
       {/* Safety Status Card */}
-      <View style={styles.statusCard}>
+      <View style={[styles.statusCard, { backgroundColor: currentTheme.surface }]}>
         <View style={styles.statusHeader}>
-          <Text style={styles.statusTitle}>Safety Status</Text>
+          <Text style={[styles.statusTitle, { color: currentTheme.text }]}>Safety Status</Text>
           <View style={styles.statusIndicator}>
             <View style={[styles.statusDot, safetyMonitoring ? styles.statusActive : styles.statusInactive]} />
-            <Text style={styles.statusText}>{safetyMonitoring ? 'Active' : 'Inactive'}</Text>
+            <Text style={[styles.statusText, { color: currentTheme.text }]}>
+              {safetyMonitoring ? 'Active' : 'Inactive'}
+            </Text>
           </View>
         </View>
         
         <View style={styles.mainSwitchContainer}>
-          <Text style={styles.switchLabel}>Safety Monitoring</Text>
+          <Text style={[styles.switchLabel, { color: currentTheme.text }]}>Enable Safety Monitoring</Text>
           <Switch
-            trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
-            thumbColor={safetyMonitoring ? "#4CAF50" : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: currentTheme.accentLight }}
+            thumbColor={safetyMonitoring ? currentTheme.accent : "#f4f3f4"}
             onValueChange={toggleSafetyMonitoring}
             value={safetyMonitoring}
           />
@@ -91,8 +97,10 @@ export default function HomeScreen() {
             style={styles.viewMonitoringButton}
             onPress={() => navigation.navigate('Monitoring')}
           >
-            <Text style={styles.viewMonitoringText}>View Monitoring Details</Text>
-            <Ionicons name="chevron-forward" size={18} color="#4CAF50" />
+            <Text style={[styles.viewMonitoringText, { color: currentTheme.accent }]}>
+              View Monitoring Status
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={currentTheme.accent} />
           </TouchableOpacity>
         )}
       </View>
@@ -103,84 +111,85 @@ export default function HomeScreen() {
         onPress={handleSOSPress}
         activeOpacity={0.8}
       >
-        <View style={styles.sosInner}>
-          <Text style={styles.sosText}>SOS</Text>
+        <View style={[styles.sosInner, { borderColor: currentTheme.error }]}>
+          <Text style={[styles.sosText, { color: currentTheme.error }]}>SOS</Text>
         </View>
       </TouchableOpacity>
 
       {/* Features Section */}
-      <Text style={styles.sectionTitle}>Safety Features</Text>
+      <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Safety Features</Text>
+      
       <ScrollView style={styles.featuresContainer}>
-        <View style={styles.featureCard}>
-          <View style={styles.featureIconContainer}>
-            <MaterialIcons name="location-on" size={24} color="#4CAF50" />
+        <View style={[styles.featureCard, { backgroundColor: currentTheme.surface }]}>
+          <View style={[styles.featureIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+            <MaterialIcons name="location-on" size={24} color={currentTheme.text} />
           </View>
           <View style={styles.featureContent}>
-            <Text style={styles.featureTitle}>Location Monitoring</Text>
-            <Text style={styles.featureDescription}>
-              Tracks your location and assesses safety based on crime data
+            <Text style={[styles.featureTitle, { color: currentTheme.text }]}>Location Sharing</Text>
+            <Text style={[styles.featureDescription, { color: currentTheme.textSecondary }]}>
+              Share your real-time location with emergency contacts
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
-            thumbColor={locationSharing ? "#4CAF50" : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: currentTheme.accentLight }}
+            thumbColor={locationSharing ? currentTheme.accent : "#f4f3f4"}
             onValueChange={() => setLocationSharing(!locationSharing)}
             value={locationSharing}
             disabled={!safetyMonitoring}
           />
         </View>
 
-        <View style={styles.featureCard}>
-          <View style={styles.featureIconContainer}>
-            <FontAwesome5 name="microphone-alt" size={24} color="#2196F3" />
+        <View style={[styles.featureCard, { backgroundColor: currentTheme.surface }]}>
+          <View style={[styles.featureIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+            <MaterialIcons name="mic" size={24} color={currentTheme.text} />
           </View>
           <View style={styles.featureContent}>
-            <Text style={styles.featureTitle}>Audio Monitoring</Text>
-            <Text style={styles.featureDescription}>
+            <Text style={[styles.featureTitle, { color: currentTheme.text }]}>Audio Monitoring</Text>
+            <Text style={[styles.featureDescription, { color: currentTheme.textSecondary }]}>
               Detects panic or distress in voice patterns
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
-            thumbColor={audioMonitoring ? "#2196F3" : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: currentTheme.accentLight }}
+            thumbColor={audioMonitoring ? currentTheme.accent : "#f4f3f4"}
             onValueChange={() => setAudioMonitoring(!audioMonitoring)}
             value={audioMonitoring}
             disabled={!safetyMonitoring}
           />
         </View>
 
-        <View style={styles.featureCard}>
-          <View style={styles.featureIconContainer}>
-            <MaterialIcons name="gesture" size={24} color="#9C27B0" />
+        <View style={[styles.featureCard, { backgroundColor: currentTheme.surface }]}>
+          <View style={[styles.featureIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+            <MaterialIcons name="gesture" size={24} color={currentTheme.text} />
           </View>
           <View style={styles.featureContent}>
-            <Text style={styles.featureTitle}>Gesture Detection</Text>
-            <Text style={styles.featureDescription}>
+            <Text style={[styles.featureTitle, { color: currentTheme.text }]}>Gesture Detection</Text>
+            <Text style={[styles.featureDescription, { color: currentTheme.textSecondary }]}>
               Recognizes distress hand signals and body postures
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
-            thumbColor={gestureDetection ? "#9C27B0" : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: currentTheme.accentLight }}
+            thumbColor={gestureDetection ? currentTheme.accent : "#f4f3f4"}
             onValueChange={() => setGestureDetection(!gestureDetection)}
             value={gestureDetection}
             disabled={!safetyMonitoring}
           />
         </View>
 
-        <View style={styles.featureCard}>
-          <View style={styles.featureIconContainer}>
-            <MaterialIcons name="directions-run" size={24} color="#FF9800" />
+        <View style={[styles.featureCard, { backgroundColor: currentTheme.surface }]}>
+          <View style={[styles.featureIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+            <MaterialIcons name="run" size={24} color={currentTheme.text} />
           </View>
           <View style={styles.featureContent}>
-            <Text style={styles.featureTitle}>Motion Detection</Text>
-            <Text style={styles.featureDescription}>
+            <Text style={[styles.featureTitle, { color: currentTheme.text }]}>Motion Detection</Text>
+            <Text style={[styles.featureDescription, { color: currentTheme.textSecondary }]}>
               Identifies abnormal movement patterns indicating distress
             </Text>
           </View>
           <Switch
-            trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
-            thumbColor={motionDetection ? "#FF9800" : "#f4f3f4"}
+            trackColor={{ false: "#d1d1d1", true: currentTheme.accentLight }}
+            thumbColor={motionDetection ? currentTheme.accent : "#f4f3f4"}
             onValueChange={() => setMotionDetection(!motionDetection)}
             value={motionDetection}
             disabled={!safetyMonitoring}
@@ -188,10 +197,10 @@ export default function HomeScreen() {
         </View>
 
         <TouchableOpacity 
-          style={styles.contactsButton}
+          style={[styles.contactsButton, { backgroundColor: currentTheme.accent }]}
           onPress={() => navigation.navigate('Contacts')}
         >
-          <MaterialIcons name="people" size={20} color="#fff" />
+          <MaterialIcons name="people" size={24} color="#fff" />
           <Text style={styles.contactsButtonText}>Manage Emergency Contacts</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -202,7 +211,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f7',
   },
   header: {
     flexDirection: 'row',
@@ -210,20 +218,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eaeaea',
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
   },
   settingsButton: {
     padding: 8,
   },
   statusCard: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 20,
     margin: 16,
@@ -242,7 +246,6 @@ const styles = StyleSheet.create({
   statusTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   statusIndicator: {
     flexDirection: 'row',
@@ -273,7 +276,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
   },
   viewMonitoringButton: {
     flexDirection: 'row',
@@ -287,8 +289,6 @@ const styles = StyleSheet.create({
   viewMonitoringText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#4CAF50',
-    marginRight: 4,
   },
   sosButton: {
     alignSelf: 'center',
@@ -313,17 +313,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#F44336',
   },
   sosText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#F44336',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginLeft: 16,
     marginTop: 8,
     marginBottom: 8,
@@ -335,7 +332,6 @@ const styles = StyleSheet.create({
   featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -349,7 +345,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -360,19 +355,16 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   featureDescription: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 18,
   },
   contactsButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CAF50',
     borderRadius: 12,
     padding: 16,
     marginVertical: 16,

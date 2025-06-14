@@ -7,7 +7,8 @@ import HomeScreen from "./screens/HomeScreen"
 import SettingsScreen from "./screens/SettingsScreen"
 import ContactsScreen from "./screens/ContactsScreen"
 import MonitoringScreen from "./screens/MonitoringScreen"
-
+import { ThemeProvider } from './context/ThemeContext';
+ 
 const Stack = createNativeStackNavigator();
 
 function RootStack() {
@@ -26,10 +27,12 @@ function RootStack() {
 export default function App() {
   return (
     <SafeAreaProvider style={styles.container}>
-      <Toaster />
-      <NavigationContainer>
-        <RootStack />
-      </NavigationContainer>
+      <ThemeProvider>
+        <Toaster />
+        <NavigationContainer>
+          <RootStack />
+        </NavigationContainer>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -13,14 +13,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { toast } from 'sonner-native';
+import { useTheme, theme } from '../context/ThemeContext';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const [autoRecord, setAutoRecord] = useState(true);
   const [biometricAuth, setBiometricAuth] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [sensitivityLevel, setSensitivityLevel] = useState('medium');
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  const currentTheme = isDarkMode ? theme.dark : theme.light;
 
   const handleSensitivityChange = (level) => {
     setSensitivityLevel(level);
@@ -46,25 +48,28 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <View style={[styles.header, { 
+        backgroundColor: currentTheme.surface,
+        borderBottomColor: currentTheme.border 
+      }]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={[styles.headerTitle, { color: currentTheme.text }]}>Settings</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>General</Text>
+        <Text style={[styles.sectionTitle, { color: currentTheme.textSecondary }]}>General</Text>
         
-        <View style={styles.settingItem}>
+        <View style={[styles.settingItem, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.settingInfo}>
             <MaterialIcons name="notifications" size={22} color="#4CAF50" />
-            <Text style={styles.settingLabel}>Notifications</Text>
+            <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Notifications</Text>
           </View>
           <Switch
             trackColor={{ false: "#d1d1d1", true: "#a5d6a7" }}
@@ -74,10 +79,10 @@ export default function SettingsScreen() {
           />
         </View>
         
-        <View style={styles.settingItem}>
+        <View style={[styles.settingItem, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.settingInfo}>
             <MaterialIcons name="fingerprint" size={22} color="#2196F3" />
-            <Text style={styles.settingLabel}>Biometric Authentication</Text>
+            <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Biometric Authentication</Text>
           </View>
           <Switch
             trackColor={{ false: "#d1d1d1", true: "#bbdefb" }}
@@ -87,25 +92,25 @@ export default function SettingsScreen() {
           />
         </View>
         
-        <View style={styles.settingItem}>
+        <View style={[styles.settingItem, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.settingInfo}>
-            <MaterialIcons name="brightness-4" size={22} color="#9E9E9E" />
-            <Text style={styles.settingLabel}>Dark Mode</Text>
+            <MaterialIcons name="brightness-4" size={22} color={isDarkMode ? '#fff' : '#9E9E9E'} />
+            <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Dark Mode</Text>
           </View>
           <Switch
             trackColor={{ false: "#d1d1d1", true: "#e0e0e0" }}
-            thumbColor={darkMode ? "#9E9E9E" : "#f4f3f4"}
-            onValueChange={() => setDarkMode(!darkMode)}
-            value={darkMode}
+            thumbColor={isDarkMode ? '#fff' : '#f4f3f4'}
+            onValueChange={toggleDarkMode}
+            value={isDarkMode}
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Safety Features</Text>
+        <Text style={[styles.sectionTitle, { color: currentTheme.textSecondary }]}>Safety Features</Text>
         
-        <View style={styles.settingItem}>
+        <View style={[styles.settingItem, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.settingInfo}>
             <MaterialIcons name="videocam" size={22} color="#F44336" />
-            <Text style={styles.settingLabel}>Auto Record in Emergency</Text>
+            <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Auto Record in Emergency</Text>
           </View>
           <Switch
             trackColor={{ false: "#d1d1d1", true: "#ffcdd2" }}
@@ -115,7 +120,7 @@ export default function SettingsScreen() {
           />
         </View>
         
-        <Text style={[styles.sectionTitle, {marginTop: 20}]}>Detection Sensitivity</Text>
+        <Text style={[styles.sectionTitle, {marginTop: 20, color: currentTheme.textSecondary}]}>Detection Sensitivity</Text>
         
         <View style={styles.sensitivityContainer}>
           <TouchableOpacity 
@@ -158,45 +163,62 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.sensitivityDescription}>
+        <Text style={[styles.sensitivityDescription, { color: currentTheme.textSecondary }]}>
           Higher sensitivity may increase false alarms but ensures better detection of potential threats.
         </Text>
         
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={[styles.sectionTitle, { color: currentTheme.textSecondary }]}>Account</Text>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Profile')}>
-          <MaterialIcons name="person" size={22} color="#333" />
-          <Text style={styles.menuItemText}>Edit Profile</Text>
-          <MaterialIcons name="chevron-right" size={22} color="#999" />
+        <TouchableOpacity 
+          style={[styles.menuItem, { backgroundColor: currentTheme.surface }]} 
+          onPress={() => navigation.navigate('Profile')}
+        >
+          <MaterialIcons name="person" size={22} color={currentTheme.text} />
+          <Text style={[styles.menuItemText, { color: currentTheme.text }]}>Edit Profile</Text>
+          <MaterialIcons name="chevron-right" size={22} color={currentTheme.textSecondary} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EmergencyContacts')}>
-          <MaterialIcons name="people" size={22} color="#333" />
-          <Text style={styles.menuItemText}>Emergency Contacts</Text>
-          <MaterialIcons name="chevron-right" size={22} color="#999" />
+        <TouchableOpacity 
+          style={[styles.menuItem, { backgroundColor: currentTheme.surface }]} 
+          onPress={() => navigation.navigate('EmergencyContacts')}
+        >
+          <MaterialIcons name="people" size={22} color={currentTheme.text} />
+          <Text style={[styles.menuItemText, { color: currentTheme.text }]}>Emergency Contacts</Text>
+          <MaterialIcons name="chevron-right" size={22} color={currentTheme.textSecondary} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('PrivacyPolicy')}>
-          <MaterialIcons name="security" size={22} color="#333" />
-          <Text style={styles.menuItemText}>Privacy Policy</Text>
-          <MaterialIcons name="chevron-right" size={22} color="#999" />
+        <TouchableOpacity 
+          style={[styles.menuItem, { backgroundColor: currentTheme.surface }]} 
+          onPress={() => navigation.navigate('PrivacyPolicy')}
+        >
+          <MaterialIcons name="security" size={22} color={currentTheme.text} />
+          <Text style={[styles.menuItemText, { color: currentTheme.text }]}>Privacy Policy</Text>
+          <MaterialIcons name="chevron-right" size={22} color={currentTheme.textSecondary} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Help')}>
-          <MaterialIcons name="help" size={22} color="#333" />
-          <Text style={styles.menuItemText}>Help & Support</Text>
-          <MaterialIcons name="chevron-right" size={22} color="#999" />
+        <TouchableOpacity 
+          style={[styles.menuItem, { backgroundColor: currentTheme.surface }]} 
+          onPress={() => navigation.navigate('Help')}
+        >
+          <MaterialIcons name="help" size={22} color={currentTheme.text} />
+          <Text style={[styles.menuItemText, { color: currentTheme.text }]}>Help & Support</Text>
+          <MaterialIcons name="chevron-right" size={22} color={currentTheme.textSecondary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.clearDataButton, { backgroundColor: currentTheme.surface }]} 
+          onPress={handleClearData}
+        >
+          <Text style={[styles.clearDataText, { color: currentTheme.error }]}>Clear App Data</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.clearDataButton} onPress={handleClearData}>
-          <Text style={styles.clearDataText}>Clear App Data</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity 
+          style={[styles.logoutButton, { backgroundColor: currentTheme.error }]}
+        >
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
         
-        <Text style={styles.versionText}>Guardian v1.0.0</Text>
+        <Text style={[styles.versionText, { color: currentTheme.textSecondary }]}>Guardian v1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

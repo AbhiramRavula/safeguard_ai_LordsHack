@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { toast } from 'sonner-native';
+import { useTheme, theme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +46,8 @@ const initialDetectionData = {
 
 export default function MonitoringScreen() {
   const navigation = useNavigation();
+  const { isDarkMode } = useTheme();
+  const currentTheme = isDarkMode ? theme.dark : theme.light;
   const [detectionData, setDetectionData] = useState(initialDetectionData);
   const [overallThreatLevel, setOverallThreatLevel] = useState('low');
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -137,108 +140,104 @@ export default function MonitoringScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <View style={[styles.header, { 
+        backgroundColor: currentTheme.surface,
+        borderBottomColor: currentTheme.border 
+      }]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Safety Monitoring</Text>
+        <Text style={[styles.headerTitle, { color: currentTheme.text }]}>Safety Monitoring</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
         {/* Overall Threat Level */}
         <View style={[styles.threatCard, { 
-          backgroundColor: isAnalyzing ? '#f5f5f7' : 
-            overallThreatLevel === 'high' ? '#ffebee' : 
-            overallThreatLevel === 'medium' ? '#fff3e0' : 
-            '#e8f5e9'
+          backgroundColor: currentTheme.surface,
         }]}>
-          <Text style={styles.threatTitle}>Overall Threat Assessment</Text>
+          <Text style={[styles.threatTitle, { color: currentTheme.text }]}>Overall Threat Assessment</Text>
           
           {isAnalyzing ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4CAF50" />
-              <Text style={styles.loadingText}>Analyzing environment...</Text>
-            </View>
-          ) : (
-            <View style={styles.threatLevelContainer}>
-              <View style={[styles.threatIndicator, { backgroundColor: getRiskColor(overallThreatLevel) }]} />
-              <Text style={[styles.threatLevel, { color: getRiskColor(overallThreatLevel) }]}>
-                {overallThreatLevel.toUpperCase()} THREAT LEVEL
+              <ActivityIndicator size="large" color={currentTheme.accent} />
+              <Text style={[styles.loadingText, { color: currentTheme.textSecondary }]}>
+                Analyzing environment...
               </Text>
             </View>
+          ) : (
+            <>
+              <View style={styles.threatLevelContainer}>
+                <View style={[styles.threatIndicator, { backgroundColor: getRiskColor(overallThreatLevel) }]} />
+                <Text style={[styles.threatLevel, { color: currentTheme.text }]}>
+                  {overallThreatLevel.toUpperCase()} RISK
+                </Text>
+              </View>
+              <Text style={[styles.threatDescription, { color: currentTheme.textSecondary }]}>
+                AI-powered analysis of your environment indicates {overallThreatLevel} risk level.
+                {overallThreatLevel !== 'low' && ' Maintaining heightened awareness is recommended.'}
+              </Text>
+            </>
           )}
-          
-          <Text style={styles.threatDescription}>
-            {isAnalyzing ? 'Initial analysis in progress...' : 
-              overallThreatLevel === 'high' ? 'Potential danger detected. Emergency protocols ready.' : 
-              overallThreatLevel === 'medium' ? 'Elevated risk factors present. Monitoring closely.' : 
-              'Environment appears safe. Continuous monitoring active.'}
-          </Text>
         </View>
 
-        {/* Detection Modules */}
-        <Text style={styles.sectionTitle}>Detection Modules</Text>
-        
-        {/* Audio Analysis */}
-        <View style={styles.moduleCard}>
+        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Detection Modules</Text>
+
+        {/* Audio Analysis Module */}
+        <View style={[styles.moduleCard, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.moduleHeader}>
-            <View style={styles.moduleIconContainer}>
-              <FontAwesome5 name="microphone-alt" size={20} color="#2196F3" />
+            <View style={[styles.moduleIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+              <MaterialIcons name="mic" size={20} color={currentTheme.text} />
             </View>
-            <Text style={styles.moduleTitle}>Audio Analysis</Text>
-            <View style={[styles.statusDot, { 
-              backgroundColor: getStatusColor(detectionData.audioAnalysis.status) 
-            }]} />
+            <Text style={[styles.moduleTitle, { color: currentTheme.text }]}>Audio Analysis</Text>
+            <View style={[styles.statusDot, { backgroundColor: getStatusColor(detectionData.audioAnalysis.status) }]} />
           </View>
           
           <View style={styles.moduleContent}>
             <View style={styles.confidenceBar}>
               <View 
                 style={[
-                  styles.confidenceFill, 
+                  styles.confidenceFill,
                   { 
-                    width: `${detectionData.audioAnalysis.confidence}%`,
-                    backgroundColor: detectionData.audioAnalysis.confidence > 70 ? '#F44336' : '#4CAF50'
+                    backgroundColor: currentTheme.accent,
+                    width: `${detectionData.audioAnalysis.confidence}%`
                   }
                 ]} 
               />
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Confidence:</Text>
-              <Text style={styles.detailValue}>
-                {Math.round(detectionData.audioAnalysis.confidence)}%
-              </Text>
-            </View>
-            
-            <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={[styles.detailValue, { 
-                color: getStatusColor(detectionData.audioAnalysis.status) 
-              }]}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Status</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {detectionData.audioAnalysis.status.toUpperCase()}
               </Text>
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Last Update:</Text>
-              <Text style={styles.detailValue}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Last Update</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {formatTime(detectionData.audioAnalysis.lastUpdate)}
               </Text>
             </View>
             
             {detectionData.audioAnalysis.detectedEmotions.length > 0 && (
               <View style={styles.detectedItemsContainer}>
-                <Text style={styles.detectedItemsLabel}>Detected Emotions:</Text>
+                <Text style={[styles.detectedItemsLabel, { color: currentTheme.textSecondary }]}>
+                  Detected Emotions
+                </Text>
                 <View style={styles.detectedItems}>
                   {detectionData.audioAnalysis.detectedEmotions.map((emotion, index) => (
-                    <View key={index} style={styles.detectedItem}>
-                      <Text style={styles.detectedItemText}>{emotion}</Text>
+                    <View 
+                      key={index} 
+                      style={[styles.detectedItem, { backgroundColor: currentTheme.errorLight }]}
+                    >
+                      <Text style={[styles.detectedItemText, { color: currentTheme.error }]}>
+                        {emotion}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -247,61 +246,57 @@ export default function MonitoringScreen() {
           </View>
         </View>
         
-        {/* Gesture Detection */}
-        <View style={styles.moduleCard}>
+        {/* Gesture Detection Module */}
+        <View style={[styles.moduleCard, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.moduleHeader}>
-            <View style={styles.moduleIconContainer}>
-              <MaterialIcons name="gesture" size={20} color="#9C27B0" />
+            <View style={[styles.moduleIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+              <MaterialIcons name="gesture" size={20} color={currentTheme.text} />
             </View>
-            <Text style={styles.moduleTitle}>Gesture Detection</Text>
-            <View style={[styles.statusDot, { 
-              backgroundColor: getStatusColor(detectionData.gestureDetection.status) 
-            }]} />
+            <Text style={[styles.moduleTitle, { color: currentTheme.text }]}>Gesture Detection</Text>
+            <View style={[styles.statusDot, { backgroundColor: getStatusColor(detectionData.gestureDetection.status) }]} />
           </View>
           
           <View style={styles.moduleContent}>
             <View style={styles.confidenceBar}>
               <View 
                 style={[
-                  styles.confidenceFill, 
+                  styles.confidenceFill,
                   { 
-                    width: `${detectionData.gestureDetection.confidence}%`,
-                    backgroundColor: detectionData.gestureDetection.confidence > 70 ? '#F44336' : '#4CAF50'
+                    backgroundColor: currentTheme.accent,
+                    width: `${detectionData.gestureDetection.confidence}%`
                   }
                 ]} 
               />
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Confidence:</Text>
-              <Text style={styles.detailValue}>
-                {Math.round(detectionData.gestureDetection.confidence)}%
-              </Text>
-            </View>
-            
-            <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={[styles.detailValue, { 
-                color: getStatusColor(detectionData.gestureDetection.status) 
-              }]}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Status</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {detectionData.gestureDetection.status.toUpperCase()}
               </Text>
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Last Update:</Text>
-              <Text style={styles.detailValue}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Last Update</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {formatTime(detectionData.gestureDetection.lastUpdate)}
               </Text>
             </View>
             
             {detectionData.gestureDetection.detectedGestures.length > 0 && (
               <View style={styles.detectedItemsContainer}>
-                <Text style={styles.detectedItemsLabel}>Detected Gestures:</Text>
+                <Text style={[styles.detectedItemsLabel, { color: currentTheme.textSecondary }]}>
+                  Detected Gestures
+                </Text>
                 <View style={styles.detectedItems}>
                   {detectionData.gestureDetection.detectedGestures.map((gesture, index) => (
-                    <View key={index} style={styles.detectedItem}>
-                      <Text style={styles.detectedItemText}>{gesture}</Text>
+                    <View 
+                      key={index} 
+                      style={[styles.detectedItem, { backgroundColor: currentTheme.errorLight }]}
+                    >
+                      <Text style={[styles.detectedItemText, { color: currentTheme.error }]}>
+                        {gesture}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -310,61 +305,57 @@ export default function MonitoringScreen() {
           </View>
         </View>
         
-        {/* Motion Analysis */}
-        <View style={styles.moduleCard}>
+        {/* Motion Analysis Module */}
+        <View style={[styles.moduleCard, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.moduleHeader}>
-            <View style={styles.moduleIconContainer}>
-              <MaterialIcons name="directions-run" size={20} color="#FF9800" />
+            <View style={[styles.moduleIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+              <MaterialIcons name="directions-run" size={20} color={currentTheme.text} />
             </View>
-            <Text style={styles.moduleTitle}>Motion Analysis</Text>
-            <View style={[styles.statusDot, { 
-              backgroundColor: getStatusColor(detectionData.motionAnalysis.status) 
-            }]} />
+            <Text style={[styles.moduleTitle, { color: currentTheme.text }]}>Motion Analysis</Text>
+            <View style={[styles.statusDot, { backgroundColor: getStatusColor(detectionData.motionAnalysis.status) }]} />
           </View>
           
           <View style={styles.moduleContent}>
             <View style={styles.confidenceBar}>
               <View 
                 style={[
-                  styles.confidenceFill, 
+                  styles.confidenceFill,
                   { 
-                    width: `${detectionData.motionAnalysis.confidence}%`,
-                    backgroundColor: detectionData.motionAnalysis.confidence > 70 ? '#F44336' : '#4CAF50'
+                    backgroundColor: currentTheme.accent,
+                    width: `${detectionData.motionAnalysis.confidence}%`
                   }
                 ]} 
               />
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Confidence:</Text>
-              <Text style={styles.detailValue}>
-                {Math.round(detectionData.motionAnalysis.confidence)}%
-              </Text>
-            </View>
-            
-            <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Status:</Text>
-              <Text style={[styles.detailValue, { 
-                color: getStatusColor(detectionData.motionAnalysis.status) 
-              }]}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Status</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {detectionData.motionAnalysis.status.toUpperCase()}
               </Text>
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Last Update:</Text>
-              <Text style={styles.detailValue}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Last Update</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {formatTime(detectionData.motionAnalysis.lastUpdate)}
               </Text>
             </View>
             
             {detectionData.motionAnalysis.detectedPatterns.length > 0 && (
               <View style={styles.detectedItemsContainer}>
-                <Text style={styles.detectedItemsLabel}>Detected Patterns:</Text>
+                <Text style={[styles.detectedItemsLabel, { color: currentTheme.textSecondary }]}>
+                  Detected Patterns
+                </Text>
                 <View style={styles.detectedItems}>
                   {detectionData.motionAnalysis.detectedPatterns.map((pattern, index) => (
-                    <View key={index} style={styles.detectedItem}>
-                      <Text style={styles.detectedItemText}>{pattern}</Text>
+                    <View 
+                      key={index} 
+                      style={[styles.detectedItem, { backgroundColor: currentTheme.errorLight }]}
+                    >
+                      <Text style={[styles.detectedItemText, { color: currentTheme.error }]}>
+                        {pattern}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -373,38 +364,34 @@ export default function MonitoringScreen() {
           </View>
         </View>
         
-        {/* Location Risk */}
-        <View style={styles.moduleCard}>
+        {/* Location Risk Module */}
+        <View style={[styles.moduleCard, { backgroundColor: currentTheme.surface }]}>
           <View style={styles.moduleHeader}>
-            <View style={styles.moduleIconContainer}>
-              <MaterialIcons name="location-on" size={20} color="#4CAF50" />
+            <View style={[styles.moduleIconContainer, { backgroundColor: currentTheme.surfaceSecondary }]}>
+              <MaterialIcons name="location-on" size={20} color={currentTheme.text} />
             </View>
-            <Text style={styles.moduleTitle}>Location Risk Assessment</Text>
-            <View style={[styles.statusDot, { 
-              backgroundColor: getRiskColor(detectionData.locationRisk.riskLevel) 
-            }]} />
+            <Text style={[styles.moduleTitle, { color: currentTheme.text }]}>Location Risk Assessment</Text>
+            <View style={[styles.statusDot, { backgroundColor: getRiskColor(detectionData.locationRisk.riskLevel) }]} />
           </View>
           
           <View style={styles.moduleContent}>
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Risk Level:</Text>
-              <Text style={[styles.detailValue, { 
-                color: getRiskColor(detectionData.locationRisk.riskLevel) 
-              }]}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Risk Level</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {detectionData.locationRisk.riskLevel.toUpperCase()}
               </Text>
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Nearby Incidents:</Text>
-              <Text style={styles.detailValue}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Nearby Incidents</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {detectionData.locationRisk.nearbyIncidents}
               </Text>
             </View>
             
             <View style={styles.moduleDetails}>
-              <Text style={styles.detailLabel}>Last Update:</Text>
-              <Text style={styles.detailValue}>
+              <Text style={[styles.detailLabel, { color: currentTheme.textSecondary }]}>Last Update</Text>
+              <Text style={[styles.detailValue, { color: currentTheme.text }]}>
                 {formatTime(detectionData.locationRisk.lastUpdate)}
               </Text>
             </View>
@@ -412,15 +399,12 @@ export default function MonitoringScreen() {
         </View>
         
         <TouchableOpacity 
-          style={styles.emergencyButton}
+          style={[styles.emergencyButton, { backgroundColor: currentTheme.error }]}
           onPress={() => {
-            toast.error('Emergency Alert Triggered', {
-              description: 'Notifying emergency contacts and authorities',
-              duration: 5000,
-            });
+            toast.error('Emergency services contacted');
           }}
         >
-          <Text style={styles.emergencyButtonText}>TRIGGER EMERGENCY ALERT</Text>
+          <Text style={styles.emergencyButtonText}>Contact Emergency Services</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

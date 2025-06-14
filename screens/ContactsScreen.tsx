@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { toast } from 'sonner-native';
-
+import { useTheme, theme } from '../context/ThemeContext';
+ 
 // Sample initial contacts
 const initialContacts = [
   { id: '1', name: 'Mom', phone: '+1 (555) 123-4567', priority: 1 },
@@ -23,6 +24,8 @@ const initialContacts = [
 
 export default function ContactsScreen() {
   const navigation = useNavigation();
+  const { isDarkMode } = useTheme();
+  const currentTheme = isDarkMode ? theme.dark : theme.light;
   const [contacts, setContacts] = useState(initialContacts);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
@@ -98,18 +101,18 @@ export default function ContactsScreen() {
   };
 
   const renderContactItem = ({ item }) => (
-    <View style={styles.contactCard}>
+    <View style={[styles.contactCard, { backgroundColor: currentTheme.surface }]}>
       <View style={styles.contactInfo}>
-        <View style={[styles.priorityBadge, {
-          backgroundColor: 
-            item.priority === 1 ? '#F44336' : 
-            item.priority === 2 ? '#FF9800' : '#4CAF50'
+        <View style={[styles.priorityBadge, { 
+          backgroundColor: item.priority === 1 ? currentTheme.error : 
+                         item.priority === 2 ? currentTheme.warning : 
+                         currentTheme.accent 
         }]}>
           <Text style={styles.priorityText}>{item.priority}</Text>
         </View>
         <View>
-          <Text style={styles.contactName}>{item.name}</Text>
-          <Text style={styles.contactPhone}>{item.phone}</Text>
+          <Text style={[styles.contactName, { color: currentTheme.text }]}>{item.name}</Text>
+          <Text style={[styles.contactPhone, { color: currentTheme.textSecondary }]}>{item.phone}</Text>
         </View>
       </View>
       
@@ -118,36 +121,39 @@ export default function ContactsScreen() {
           style={styles.editButton}
           onPress={() => openEditModal(item)}
         >
-          <MaterialIcons name="edit" size={20} color="#2196F3" />
+          <MaterialIcons name="edit" size={22} color={currentTheme.accent} />
         </TouchableOpacity>
-        
         <TouchableOpacity 
           style={styles.deleteButton}
           onPress={() => handleDeleteContact(item.id)}
         >
-          <MaterialIcons name="delete" size={20} color="#F44336" />
+          <MaterialIcons name="delete" size={22} color={currentTheme.error} />
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <View style={[styles.header, { 
+        backgroundColor: currentTheme.surface,
+        borderBottomColor: currentTheme.border 
+      }]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Emergency Contacts</Text>
+        <Text style={[styles.headerTitle, { color: currentTheme.text }]}>Emergency Contacts</Text>
         <View style={styles.placeholder} />
       </View>
 
-      <View style={styles.infoCard}>
-        <FontAwesome name="info-circle" size={20} color="#2196F3" style={styles.infoIcon} />
-        <Text style={styles.infoText}>
-          These contacts will be notified in order of priority when an emergency is detected
+      <View style={[styles.infoCard, { backgroundColor: currentTheme.accentLight }]}>
+        <MaterialIcons name="info" size={24} color={currentTheme.accent} style={styles.infoIcon} />
+        <Text style={[styles.infoText, { color: currentTheme.accent }]}>
+          Add up to 5 emergency contacts who will be notified in case of emergency.
+          Priority 1 contacts will be contacted first.
         </Text>
       </View>
 
@@ -158,92 +164,98 @@ export default function ContactsScreen() {
         contentContainerStyle={styles.contactsList}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No emergency contacts added yet</Text>
+            <Text style={[styles.emptyText, { color: currentTheme.textSecondary }]}>
+              No emergency contacts added yet
+            </Text>
           </View>
         }
       />
 
       <TouchableOpacity 
-        style={styles.addButton}
+        style={[styles.addButton, { backgroundColor: currentTheme.accent }]}
         onPress={openAddModal}
       >
         <MaterialIcons name="add" size={24} color="#fff" />
         <Text style={styles.addButtonText}>Add Emergency Contact</Text>
       </TouchableOpacity>
 
-      {/* Add/Edit Contact Modal */}
       <Modal
-        animationType="slide"
-        transparent={true}
         visible={modalVisible}
+        transparent={true}
+        animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingContact ? 'Edit Contact' : 'Add New Contact'}
+          <View style={[styles.modalContent, { backgroundColor: currentTheme.surface }]}>
+            <Text style={[styles.modalTitle, { color: currentTheme.text }]}>
+              {editingContact ? 'Edit Contact' : 'Add Contact'}
             </Text>
             
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Name</Text>
+              <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { 
+                  backgroundColor: currentTheme.surfaceSecondary,
+                  color: currentTheme.text
+                }]}
                 value={name}
                 onChangeText={setName}
-                placeholder="Contact Name"
+                placeholder="Enter name"
+                placeholderTextColor={currentTheme.textSecondary}
               />
             </View>
-            
+
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
+              <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Phone Number</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { 
+                  backgroundColor: currentTheme.surfaceSecondary,
+                  color: currentTheme.text
+                }]}
                 value={phone}
                 onChangeText={setPhone}
-                placeholder="Phone Number"
+                placeholder="Enter phone number"
+                placeholderTextColor={currentTheme.textSecondary}
                 keyboardType="phone-pad"
               />
             </View>
-            
+
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Priority (1-3)</Text>
+              <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Priority</Text>
               <View style={styles.prioritySelector}>
-                {[1, 2, 3].map((num) => (
+                {['1', '2', '3'].map((p) => (
                   <TouchableOpacity
-                    key={num}
+                    key={p}
                     style={[
                       styles.priorityOption,
-                      parseInt(priority) === num && styles.prioritySelected,
-                      num === 1 ? { backgroundColor: '#ffebee' } : 
-                      num === 2 ? { backgroundColor: '#fff3e0' } : 
-                      { backgroundColor: '#e8f5e9' }
+                      { backgroundColor: currentTheme.surfaceSecondary },
+                      priority === p && [
+                        styles.prioritySelected,
+                        { borderColor: currentTheme.accent }
+                      ]
                     ]}
-                    onPress={() => setPriority(num.toString())}
+                    onPress={() => setPriority(p)}
                   >
                     <Text style={[
                       styles.priorityOptionText,
-                      parseInt(priority) === num && styles.prioritySelectedText,
-                      num === 1 ? { color: '#F44336' } : 
-                      num === 2 ? { color: '#FF9800' } : 
-                      { color: '#4CAF50' }
-                    ]}>
-                      {num}
-                    </Text>
+                      { color: currentTheme.text },
+                      priority === p && styles.prioritySelectedText
+                    ]}>{p}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
-            
+
             <View style={styles.modalActions}>
               <TouchableOpacity 
-                style={styles.cancelButton}
+                style={[styles.cancelButton, { backgroundColor: currentTheme.surfaceSecondary }]}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={[styles.cancelButtonText, { color: currentTheme.textSecondary }]}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={styles.saveButton}
+                style={[styles.saveButton, { backgroundColor: currentTheme.accent }]}
                 onPress={handleSaveContact}
               >
                 <Text style={styles.saveButtonText}>Save</Text>
